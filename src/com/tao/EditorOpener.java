@@ -11,6 +11,8 @@ import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 
 
@@ -31,6 +33,7 @@ public class EditorOpener extends JFrame {
     private JTextPane text = new JTextPane();
 
     private boolean modified = false;
+    private boolean status = false;
 
     String fileName;
     String filePath;
@@ -69,6 +72,7 @@ public class EditorOpener extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openFile();
+                status = true;
             }
         });
         file_save.addActionListener(new ActionListener() {
@@ -80,7 +84,7 @@ public class EditorOpener extends JFrame {
         file_exit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EMethod.exitFile();
+                exitFile();
             }
         });
         edit_shear.addActionListener(new ActionListener() {
@@ -112,18 +116,30 @@ public class EditorOpener extends JFrame {
         text.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                modified = true;
-
+                if (status == true) {
+                    modified = true;
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                modified = true;
+                if (status == true) {
+                    modified = true;
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                modified = true;
+                if (status == true) {
+                    modified = true;
+                }
+            }
+        });
+
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exitFile();
             }
         });
 
@@ -190,6 +206,17 @@ public class EditorOpener extends JFrame {
     }
 
     public void exitFile() {
-
+        if (modified == true) {
+            int rVal = JOptionPane.showConfirmDialog(null, "是" +
+                    "否将更改保存", "Editor", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (rVal == JOptionPane.YES_OPTION) {
+                saveFile();
+                System.exit(0);
+            } else if (rVal == JOptionPane.NO_OPTION){
+                System.exit(0);
+            }
+        } else {
+            System.exit(0);
+        }
     }
 }
